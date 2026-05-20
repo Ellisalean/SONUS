@@ -22,9 +22,11 @@ const initialSongs = [
 ];
 
 export async function seedSongs() {
-  const songs = await getSongs();
-  if (songs.length === 0) {
-    for (const song of initialSongs) {
+  const existingSongs = await getSongs();
+  const existingTitles = new Set(existingSongs.map(s => s.title));
+  
+  for (const song of initialSongs) {
+    if (!existingTitles.has(song.title)) {
       await addSong(song, crypto.randomUUID());
     }
   }
