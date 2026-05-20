@@ -22,27 +22,18 @@ export default function App() {
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
 
   useEffect(() => {
-    console.log("App initializing with auth...", auth.currentUser ? "User exists" : "No user");
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      console.log("Auth state changed:", user ? "Signed in" : "Not signed in");
-      if (user) {
-        if (!isInitialized) {
-          try {
-            console.log("Starting song seeding...");
-            await seedSongs();
-            console.log("Song seeding complete.");
-          } catch (error) {
-            console.error("Failed to seed songs:", error);
-          }
-          setIsInitialized(true);
-        }
-      } else {
-          // Instead of signing in, just initialize without user if auth fails
-          setIsInitialized(true);
+    async function initializeData() {
+      try {
+        console.log("Starting song seeding independently of auth...");
+        await seedSongs();
+        console.log("Song seeding complete.");
+      } catch (error) {
+        console.error("Failed to seed songs:", error);
       }
-    });
-    return () => unsubscribe();
-  }, [isInitialized]);
+      setIsInitialized(true);
+    }
+    initializeData();
+  }, []);
 
   const menuItems = [
     { title: 'Sheet Music', icon: FileText, color: 'text-blue-600', action: () => setCurrentView('sheetMusic') },
@@ -61,14 +52,15 @@ export default function App() {
     return <WelcomeScreen onStart={() => setShowWelcome(false)} />;
   }
 
-  if (currentView === 'sheetMusic') {
+  const renderContent = () => {
+    if (currentView === 'sheetMusic') {
       return <SheetMusicList onSongClick={(song) => {
           setSelectedSong(song);
           setCurrentView('viewer');
       }} />;
-  }
+    }
 
-  if (currentView === 'viewer' && selectedSong) {
+    if (currentView === 'viewer' && selectedSong) {
       if (selectedSong.chords) {
           return <ChordChartViewer 
               title={selectedSong.title}
@@ -82,7 +74,37 @@ export default function App() {
           pdfUrl={selectedSong.pdfUrl || ''} 
           onBack={() => setCurrentView('sheetMusic')} 
       />;
-  }
+    }
+
+    // Main Menu
+    return (
+      <>
+        <div className="relative mb-8">
+          <Search className="absolute left-3 top-3 text-gray-400" size={20} />
+          <input 
+            type="text" 
+            placeholder="Search" 
+            className="w-full pl-10 pr-4 py-3 bg-white rounded-2xl shadow-sm border border-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all" 
+          />
+        </div>
+
+        <section className="grid grid-cols-2 gap-4 mb-8">
+          {menuItems.map((item, index) => (
+            <motion.button
+              key={index}
+              onClick={item.action}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center gap-4 aspect-square"
+            >
+              <item.icon size={40} className={`${item.color}`} />
+              <span className="font-semibold text-sm">{item.title}</span>
+            </motion.button>
+          ))}
+        </section>
+      </>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-cyan-400 via-emerald-400 to-orange-300 text-gray-900 p-4 pb-24 font-sans">
@@ -101,34 +123,13 @@ export default function App() {
           <Bell size={20} />
         </button>
       </header>
-      <div className="relative mb-8">
-        <Search className="absolute left-3 top-3 text-gray-400" size={20} />
-        <input 
-          type="text" 
-          placeholder="Search" 
-          className="w-full pl-10 pr-4 py-3 bg-white rounded-2xl shadow-sm border border-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all" 
-        />
-      </div>
 
-      <section className="grid grid-cols-2 gap-4 mb-8">
-        {menuItems.map((item, index) => (
-          <motion.button
-            key={index}
-            onClick={item.action}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center gap-4 aspect-square"
-          >
-            <item.icon size={40} className={`${item.color}`} />
-            <span className="font-semibold text-sm">{item.title}</span>
-          </motion.button>
-        ))}
-      </section>
+      {renderContent()}
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 flex justify-between px-8 text-gray-400">
-        <button onClick={() => setCurrentView('menu')} className="text-blue-600"><Home size={24} /></button>
-        <button onClick={() => setCurrentView('sheetMusic')}><Library size={24} /></button>
+        <button onClick={() => setCurrentView('menu')} className={currentView === 'menu' ? "text-blue-600" : ""}><Home size={24} /></button>
+        <button onClick={() => setCurrentView('sheetMusic')} className={currentView === 'sheetMusic' ? "text-blue-600" : ""}><Library size={24} /></button>
         <button className="bg-blue-600 text-white p-3 rounded-full -mt-8 shadow-xl"><Play size={30} /></button>
         <button><Heart size={24} /></button>
         <button><User size={24} /></button>
