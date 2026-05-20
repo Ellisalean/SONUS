@@ -17,6 +17,7 @@ import { signInAnonymously } from 'firebase/auth';
 
 export default function App() {
   const [showWelcome, setShowWelcome] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
   const [currentView, setCurrentView] = useState('menu');
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
 
@@ -25,8 +26,10 @@ export default function App() {
       try {
         await signInAnonymously(auth);
         await seedSongs();
+        setIsInitialized(true);
       } catch (error) {
         console.error("Failed to initialize app:", error);
+        setIsInitialized(true);
       }
     }
     initApp();
@@ -40,6 +43,10 @@ export default function App() {
     { title: 'Calendar', icon: CalendarDays, color: 'text-purple-600' },
     { title: 'Devotionals', icon: BookOpen, color: 'text-indigo-600' },
   ];
+
+  if (!isInitialized) {
+      return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
 
   if (showWelcome) {
     return <WelcomeScreen onStart={() => setShowWelcome(false)} />;
