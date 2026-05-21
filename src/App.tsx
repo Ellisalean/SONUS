@@ -108,32 +108,36 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-cyan-400 via-emerald-400 to-orange-300 text-gray-900 p-4 pb-24 font-sans">
-      <header className="flex justify-between items-center mb-6 pt-4">
-        <div className="flex items-center gap-2">
-            {currentView !== 'menu' && (
-                <button onClick={() => setCurrentView('menu')} className="p-3 bg-white rounded-full shadow-md border hover:bg-gray-50 transition-colors">
-                    ← Back
-                </button>
-            )}
-            <h1 className="text-3xl font-bold tracking-tight">
-                {currentView === 'menu' ? 'Main Menu' : currentView === 'sheetMusic' ? 'Sheet Music' : selectedSong?.title || 'Details'}
-            </h1>
-        </div>
-        <button className="p-2 bg-black/5 rounded-full hover:bg-black/10 transition-colors">
-          <Bell size={20} />
-        </button>
-      </header>
+      {currentView !== 'viewer' && (
+        <header className="flex justify-between items-center mb-6 pt-4">
+          <div className="flex items-center gap-2">
+              {currentView !== 'menu' && (
+                  <button onClick={() => setCurrentView('menu')} className="p-3 bg-white rounded-full shadow-md border hover:bg-gray-50 transition-colors">
+                      ← Back
+                  </button>
+              )}
+              <h1 className="text-3xl font-bold tracking-tight">
+                  {currentView === 'menu' ? 'Main Menu' : 'Sheet Music'}
+              </h1>
+          </div>
+          <button className="p-2 bg-black/5 rounded-full hover:bg-black/10 transition-colors">
+            <Bell size={20} />
+          </button>
+        </header>
+      )}
 
       {renderContent()}
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 flex justify-between px-8 text-gray-400">
-        <button onClick={() => setCurrentView('menu')} className={currentView === 'menu' ? "text-blue-600" : ""}><Home size={24} /></button>
-        <button onClick={() => setCurrentView('sheetMusic')} className={currentView === 'sheetMusic' ? "text-blue-600" : ""}><Library size={24} /></button>
-        <button className="bg-blue-600 text-white p-3 rounded-full -mt-8 shadow-xl"><Play size={30} /></button>
-        <button><Heart size={24} /></button>
-        <button><User size={24} /></button>
-      </nav>
+      {currentView !== 'viewer' && (
+        /* Bottom Navigation */
+        <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 flex justify-between px-8 text-gray-400">
+          <button onClick={() => setCurrentView('menu')} className={currentView === 'menu' ? "text-blue-600" : ""}><Home size={24} /></button>
+          <button onClick={() => setCurrentView('sheetMusic')} className={currentView === 'sheetMusic' ? "text-blue-600" : ""}><Library size={24} /></button>
+          <button className="bg-blue-600 text-white p-3 rounded-full -mt-8 shadow-xl"><Play size={30} /></button>
+          <button><Heart size={24} /></button>
+          <button><User size={24} /></button>
+        </nav>
+      )}
     </div>
   );
 }
