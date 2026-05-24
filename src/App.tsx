@@ -19,7 +19,7 @@ import MusicPlayer from './components/MusicPlayer';
 import SplashScreen from './components/SplashScreen';
 import { Song, Setlist, getSongs } from './lib/db';
 import { resetSongs, forceResetSongs } from './lib/seed';
-import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged, User as FirebaseUser, signOut } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithRedirect, onAuthStateChanged, User as FirebaseUser, signOut } from 'firebase/auth';
 import { auth } from './lib/firebase';
 
 export default function App() {
@@ -280,7 +280,7 @@ export default function App() {
             <button onClick={async () => {
               const provider = new GoogleAuthProvider();
               try {
-                await signInWithPopup(auth, provider);
+                await signInWithRedirect(auth, provider);
               } catch(e) {
                 console.error("Sign-in failed:", e);
                 alert("Sign-in failed. Please check the console for details. Ensure your domain is authorized in Firebase console.");
