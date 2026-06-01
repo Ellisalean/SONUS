@@ -5,8 +5,8 @@ import { supabase } from '../lib/supabase';
 interface Announcement {
     id: string;
     created_at: string;
-    title: string;
-    content: string;
+    titulo: string;
+    contenido: string;
 }
 
 export default function Announcements({ onBack }: { onBack: () => void }) {
@@ -49,8 +49,8 @@ export default function Announcements({ onBack }: { onBack: () => void }) {
                 ) : (
                     announcements.map((a) => (
                         <div key={a.id} className="mb-6 border-b border-gray-100 pb-4">
-                            <h4 className="font-bold text-lg mb-1">{a.title}</h4>
-                            <p className="text-gray-500 text-sm">{a.content}</p>
+                            <h4 className="font-bold text-lg mb-1">{a.titulo}</h4>
+                            <p className="text-gray-500 text-sm">{a.contenido}</p>
                             <span className="text-xs text-gray-300">
                                 {new Date(a.created_at).toLocaleDateString()}
                             </span>

@@ -152,7 +152,7 @@ export default function App() {
       }
       return <PdfViewer 
           title={selectedSong.title} 
-          pdfUrl={selectedSong.pdfUrl || ''} 
+          pdf_url={selectedSong.pdf_url || ''} 
           onBack={() => setCurrentView('sheetMusic')} 
       />;
     }

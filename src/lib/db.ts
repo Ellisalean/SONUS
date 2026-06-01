@@ -30,7 +30,7 @@ export interface Song {
   id: string;
   title: string;
   artist: string;
-  pdfUrl?: string;
+  pdf_url?: string;
   chords: string;
 }
 
@@ -38,7 +38,7 @@ export interface Setlist {
   id: string;
   name: string;
   date: string;
-  songIds: string[];
+  song_ids: string[];
 }
 
 const SONGS_TABLE = 'songs_v4';

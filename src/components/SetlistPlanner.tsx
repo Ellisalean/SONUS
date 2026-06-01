@@ -25,19 +25,19 @@ export default function SetlistPlanner({ onBack, onSelectSetlist, isAdminMode }:
 
   const createSetlist = async () => {
     if (!isAdminMode || !newSetlistName) return;
-    const newId = await addSetlist({ name: newSetlistName, date: new Date().toISOString(), songIds: [] });
-    setSetlists([...setlists, { id: newId, name: newSetlistName, date: new Date().toISOString(), songIds: [] }]);
+    const newId = await addSetlist({ name: newSetlistName, date: new Date().toISOString(), song_ids: [] });
+    setSetlists([...setlists, { id: newId, name: newSetlistName, date: new Date().toISOString(), song_ids: [] }]);
     setNewSetlistName('');
   };
 
   const toggleSongInSetlist = async (setlist: Setlist, songId: string) => {
     if (!isAdminMode) return;
-    const isSelected = setlist.songIds.includes(songId);
+    const isSelected = setlist.song_ids.includes(songId);
     const newSongIds = isSelected 
-      ? setlist.songIds.filter(id => id !== songId)
-      : [...setlist.songIds, songId];
+      ? setlist.song_ids.filter(id => id !== songId)
+      : [...setlist.song_ids, songId];
     
-    const updatedSetlist = { ...setlist, songIds: newSongIds };
+    const updatedSetlist = { ...setlist, song_ids: newSongIds };
     await updateSetlist(setlist.id, updatedSetlist);
     setSetlists(setlists.map(s => s.id === setlist.id ? updatedSetlist : s));
     setEditingSetlist(updatedSetlist);
@@ -77,7 +77,7 @@ export default function SetlistPlanner({ onBack, onSelectSetlist, isAdminMode }:
                   {isAdminMode && <button onClick={(e) => { e.stopPropagation(); deleteSetlistById(setlist.id); }} className="text-red-500"><Trash2 size={18} /></button>}
               </div>
             </div>
-            <p className="text-sm text-gray-500 mb-2">{setlist.songIds.length} canciones</p>
+            <p className="text-sm text-gray-500 mb-2">{setlist.song_ids.length} canciones</p>
           </div>
         ))}
       </div>
@@ -92,7 +92,7 @@ export default function SetlistPlanner({ onBack, onSelectSetlist, isAdminMode }:
                 <div className="space-y-4">
                      <div>
                         <h4 className="font-semibold text-sm text-gray-500 mb-2">Canciones Seleccionadas (en orden) - <span className="text-blue-600 font-bold">Auto-guardando...</span></h4>
-                        {editingSetlist.songIds.map(id => {
+                        {editingSetlist.song_ids.map(id => {
                             const song = songs.find(s => s.id === id);
                             if (!song) return null;
                             return (
@@ -109,7 +109,7 @@ export default function SetlistPlanner({ onBack, onSelectSetlist, isAdminMode }:
                     </div>
                     <div>
                         <h4 className="font-semibold text-sm text-gray-500 mb-2">Canciones Disponibles</h4>
-                        {songs.filter(s => !editingSetlist.songIds.includes(s.id)).map(song => (
+                        {songs.filter(s => !editingSetlist.song_ids.includes(s.id)).map(song => (
                             <button 
                                 key={song.id}
                                 onClick={() => toggleSongInSetlist(editingSetlist, song.id)}

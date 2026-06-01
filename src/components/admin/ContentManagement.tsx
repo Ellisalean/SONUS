@@ -10,7 +10,7 @@ export default function ContentManagement() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('Guardando...');
-    const payload = table === 'anuncios' ? { title, content } : { title, reflection: content, verse: '...' };
+    const payload = table === 'anuncios' ? { titulo: title, contenido: content } : { title, reflection: content, verse: '...' };
     const { error } = await supabase.from(table).insert(payload);
     if (error) setStatus('Error: ' + error.message);
     else { setStatus('Guardado!'); setTitle(''); setContent(''); }

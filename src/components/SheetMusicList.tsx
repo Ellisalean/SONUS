@@ -21,7 +21,7 @@ export default function SheetMusicList({ onSongClick, filterBySetlist, onClearFi
     return () => { unsubscribe(); };
   }, []);
   const filteredSongs = songs.filter(song => {
-    const matchesSetlist = filterBySetlist ? filterBySetlist.songIds.includes(song.id) : true;
+    const matchesSetlist = filterBySetlist ? filterBySetlist.song_ids.includes(song.id) : true;
     const matchesSearch = song.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       song.artist.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesTab = activeTab === 'Favorites' ? favorites.includes(song.id) : true;
@@ -30,8 +30,8 @@ export default function SheetMusicList({ onSongClick, filterBySetlist, onClearFi
 
   if (filterBySetlist) {
     filteredSongs.sort((a, b) => {
-        const indexA = filterBySetlist.songIds.indexOf(a.id);
-        const indexB = filterBySetlist.songIds.indexOf(b.id);
+        const indexA = filterBySetlist.song_ids.indexOf(a.id);
+        const indexB = filterBySetlist.song_ids.indexOf(b.id);
         return indexA - indexB;
     });
   }
