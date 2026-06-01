@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Trash2, Plus } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Trash2 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
-// import { db } from '../lib/firebase';
-// import { collection, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
+import { supabase } from '../lib/supabase';
 
 interface CalendarEvent {
     id: string;
-    date: Date;
+    date: string;
     title: string;
     time: string;
     type: 'rehearsal' | 'event';
@@ -20,44 +19,37 @@ export default function Calendar({ onBack }: { onBack: () => void }) {
     const [newTitle, setNewTitle] = useState('');
 
     useEffect(() => {
-        // const fetchEvents = async () => {
-        //     const querySnapshot = await getDocs(collection(db, 'events'));
-        //     const fetchedEvents = querySnapshot.docs.map(doc => ({
-        //         id: doc.id,
-        //         ...doc.data(),
-        //         date: doc.data().date.toDate()
-        //     } as CalendarEvent));
-        //     setEvents(fetchedEvents);
-        // };
-        // fetchEvents();
+        async function fetchEvents() {
+            const { data, error } = await supabase
+                .from('agenda')
+                .select('*');
+            if (error) console.error(error);
+            else setEvents(data || []);
+        }
+        fetchEvents();
     }, []);
 
     const addEvent = async () => {
-        if (!newTitle) {
-            alert('Por favor, ingresa un título para el evento.');
-            return;
-        }
-        // try {
-        //     console.log("Saving event:", newTitle, selectedDate);
-        //     const docRef = await addDoc(collection(db, 'events'), {
-        //         date: selectedDate,
-        //         title: newTitle,
-        //         time: '9:00 am - 10:00 am',
-        //         type: 'event'
-        //     });
-        //     console.log("Event saved with ID:", docRef.id);
-        //     setEvents([...events, { id: docRef.id, date: selectedDate, title: newTitle, time: '9:00 am - 10:00 am', type: 'event' }]);
-        //     setNewTitle('');
-        //     alert('Evento añadido correctamente.');
-        // } catch (error) {
-        //     console.error("Error adding document: ", error);
-        //     alert('Hubo un error al guardar el evento. Inténtalo de nuevo.');
-        // }
+        if (!newTitle) return;
+        const { data, error } = await supabase
+            .from('agenda')
+            .insert({
+                date: selectedDate.toISOString(),
+                title: newTitle,
+                time: '9:00 am - 10:00 am',
+                type: 'event'
+            })
+            .select();
+        
+        if (error) console.error(error);
+        else setEvents([...events, ...(data || [])]);
+        setNewTitle('');
     };
 
     const deleteEvent = async (id: string) => {
-        // await deleteDoc(doc(db, 'events', id));
-        // setEvents(events.filter(e => e.id !== id));
+        const { error } = await supabase.from('agenda').delete().eq('id', id);
+        if (error) console.error(error);
+        else setEvents(events.filter(e => e.id !== id));
     };
 
     const days = eachDayOfInterval({
@@ -93,7 +85,7 @@ export default function Calendar({ onBack }: { onBack: () => void }) {
 
                 <div className="grid grid-cols-7 gap-1">
                     {days.map((day, i) => {
-                        const dayEvents = events.filter(e => isSameDay(e.date, day));
+                        const dayEvents = events.filter(e => isSameDay(new Date(e.date), day));
                         const isEvent = dayEvents.length > 0;
                         const isRehearsal = dayEvents.some(e => e.type === 'rehearsal');
                         const isSelected = isSameDay(day, selectedDate);
@@ -129,13 +121,13 @@ export default function Calendar({ onBack }: { onBack: () => void }) {
                 </div>
 
                 <div className="mt-6 border-t border-slate-100 pt-4">
-                    {events.filter(e => isSameMonth(e.date, currentDate)).map(e => (
+                    {events.filter(e => isSameMonth(new Date(e.date), currentDate)).map(e => (
                         <div key={e.id} className="p-4 mb-2 bg-slate-50 rounded-2xl flex items-center justify-between gap-4">
                             <div className="flex gap-4 items-center">
                                 <div className={`w-1 h-10 rounded ${e.type === 'rehearsal' ? 'bg-teal-500' : 'bg-rose-500'}`}></div>
                                 <div>
                                     <h4 className="font-extrabold text-slate-800">{e.title}</h4>
-                                    <p className="text-xs text-slate-500 font-bold">{e.time} • {format(e.date, 'MMM d')}</p>
+                                    <p className="text-xs text-slate-500 font-bold">{e.time} • {format(new Date(e.date), 'MMM d')}</p>
                                 </div>
                             </div>
                             <button onClick={() => deleteEvent(e.id)} className="text-rose-400 p-2"><Trash2 size={16} /></button>

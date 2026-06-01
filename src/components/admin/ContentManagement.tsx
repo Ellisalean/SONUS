@@ -1,8 +1,35 @@
+import { useState } from 'react';
+import { supabase } from '../../lib/supabase';
+
 export default function ContentManagement() {
+  const [table, setTable] = useState<'anuncios' | 'agenda' | 'devocionales'>('anuncios');
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [status, setStatus] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus('Guardando...');
+    const payload = table === 'anuncios' ? { title, content } : { title, reflection: content, verse: '...' };
+    const { error } = await supabase.from(table).insert(payload);
+    if (error) setStatus('Error: ' + error.message);
+    else { setStatus('Guardado!'); setTitle(''); setContent(''); }
+  };
+
   return (
     <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
       <h2 className="text-xl font-bold mb-4">Gestión de Contenido</h2>
-      <p className="text-gray-500">Funcionalidad de gestión (Canciones/Setlists/Devocionales) aquí.</p>
+      <select onChange={(e) => setTable(e.target.value as any)} className="w-full p-2 mb-4 border rounded">
+        <option value="anuncios">Anuncios</option>
+        <option value="devocionales">Devocionales</option>
+        <option value="agenda">Agenda</option>
+      </select>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Título" className="w-full p-2 border rounded" required />
+        <textarea value={content} onChange={e => setContent(e.target.value)} placeholder="Contenido" className="w-full p-2 border rounded" required />
+        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded">Añadir</button>
+      </form>
+      {status && <p className="mt-2 text-sm">{status}</p>}
     </div>
   );
 }
