@@ -104,6 +104,15 @@ export async function deleteSong(id: string): Promise<void> {
   }
 }
 
+export async function hardDeleteAllSongs(): Promise<void> {
+    try {
+        // Delete all rows by using a filter that matches everything
+        await supabase.from(SONGS_TABLE).delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    } catch (error) {
+        console.error('Error hard deleting songs:', error);
+    }
+}
+
 export async function getSetlists(): Promise<Setlist[]> {
   try {
     const { data, error } = await supabase.from(SETLISTS_TABLE).select('*');
