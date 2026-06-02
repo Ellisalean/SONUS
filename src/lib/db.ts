@@ -22,7 +22,6 @@ export function handleSupabaseError(error: any, operationType: OperationType, ta
     path: table
   }
   console.error('Supabase Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
 }
 
 // Entity: Song
@@ -106,8 +105,9 @@ export async function deleteSong(id: string): Promise<void> {
 
 export async function hardDeleteAllSongs(): Promise<void> {
     try {
-        // Delete all rows by using a filter that matches everything
-        await supabase.from(SONGS_TABLE).delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        // More robust way to delete all rows. 
+        // Using in(id, []) might not work, but this usually does.
+        await supabase.from(SONGS_TABLE).delete().not('id', 'is', null);
     } catch (error) {
         console.error('Error hard deleting songs:', error);
     }

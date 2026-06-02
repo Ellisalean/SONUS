@@ -16,6 +16,7 @@ export default function SheetMusicList({ onSongClick, filterBySetlist, onClearFi
   const [favorites, setFavorites] = useState<string[]>([]);
 
   useEffect(() => {
+    getSongs().then(setSongs);
     const unsubscribe = subscribeToSongs(setSongs);
     
     return () => { unsubscribe(); };
