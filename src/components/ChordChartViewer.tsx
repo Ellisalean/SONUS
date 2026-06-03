@@ -39,8 +39,10 @@ export default function ChordChartViewer({ title, artist, initialChords, onBack 
   const [transposition, setTransposition] = useState(0);
 
   const renderChords = () => {
+    // Replace literal \n with actual newlines, then split
+    const processedChords = initialChords.replace(/\\n/g, '\n');
     // Improved regex to better capture chords
-    const parts = initialChords.split(/(\[[A-G][b#]?(?:maj|min|m|dim|aug|sus[0-9]*|[0-9]*)?(?:\/[A-G][b#]?)?\])/g);
+    const parts = processedChords.split(/(\[[A-G][b#]?(?:maj|min|m|dim|aug|sus[0-9]*|[0-9]*)?(?:\/[A-G][b#]?)?\])/g);
     return parts.map((part, index) => {
       if (part.startsWith('[') && part.endsWith(']')) {
         const chord = part.slice(1, -1);
