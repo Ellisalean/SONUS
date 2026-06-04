@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
 import { songs as initialSongs, Song } from '../lib/songs';
+import { supabase } from '../lib/supabase';
 import { ChevronLeft, ChevronRight, Music, Play, X, Plus, Trash2, Edit2 } from 'lucide-react';
 
 export default function MusicPlayer({ onBack }: { onBack: () => void }) {
-    const [songs, setSongs] = useState<Song[]>(() => {
-        const saved = localStorage.getItem('sonus-songs');
-        return saved ? JSON.parse(saved) : initialSongs;
-    });
+    const [songs, setSongs] = useState<Song[]>([]);
     const [selectedSong, setSelectedSong] = useState<Song | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [showPlayer, setShowPlayer] = useState(false);
@@ -14,22 +12,29 @@ export default function MusicPlayer({ onBack }: { onBack: () => void }) {
     const [formData, setFormData] = useState<Song>({ id: '', title: '', artist: '', youtubeUrl: '' });
 
     useEffect(() => {
-        localStorage.setItem('sonus-songs', JSON.stringify(songs));
-    }, [songs]);
+        fetchSongs();
+    }, []);
 
-    const handleSave = () => {
+    const fetchSongs = async () => {
+        const { data } = await supabase.from('songs_v4').select('*');
+        if (data) setSongs(data);
+    };
+
+    const handleSave = async () => {
         if (isEditing) {
-            setSongs(songs.map(s => s.id === formData.id ? formData : s));
+            await supabase.from('songs_v4').update({ title: formData.title, artist: formData.artist, youtubeUrl: formData.youtubeUrl }).eq('id', formData.id);
         } else {
-            setSongs([...songs, { ...formData, id: Date.now().toString() }]);
+            await supabase.from('songs_v4').insert({ id: crypto.randomUUID(), title: formData.title, artist: formData.artist, youtubeUrl: formData.youtubeUrl });
         }
         setShowModal(false);
         setIsEditing(false);
+        fetchSongs();
     };
 
-    const handleDelete = (id: string, e: React.MouseEvent) => {
+    const handleDelete = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        setSongs(songs.filter(s => s.id !== id));
+        await supabase.from('songs_v4').delete().eq('id', id);
+        fetchSongs();
     };
 
     const startEdit = (song: Song, e: React.MouseEvent) => {
