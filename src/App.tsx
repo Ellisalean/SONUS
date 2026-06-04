@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
-import { Home, Library, PlusCircle, Heart, User, Search, Bell, Music, Calendar, FileText, BarChart2, Mic, Megaphone, CalendarDays, BookOpen, Play } from 'lucide-react';
+import { Home, Library, PlusCircle, Heart, User, Search, Bell, Music, FileText, BarChart2, Mic, Megaphone, BookOpen, Play } from 'lucide-react';
 import AdminDashboard from './components/AdminDashboard';
 import WelcomeScreen from './components/WelcomeScreen';
 import SheetMusicList from './components/SheetMusicList';
@@ -14,7 +14,6 @@ import PdfViewer from './components/PdfViewer';
 import ChordChartViewer from './components/ChordChartViewer';
 import TunerTools from './components/TunerTools';
 import Announcements from './components/Announcements';
-import CalendarView from './components/Calendar';
 import Devotionals from './components/Devotionals';
 import MusicPlayer from './components/MusicPlayer';
 import SplashScreen from './components/SplashScreen';
@@ -103,7 +102,6 @@ export default function App() {
     { title: 'Setlists', icon: BarChart2, color: 'text-orange-500', action: () => setCurrentView('setlistPlanner') },
     { title: 'Afinador y Tools', icon: Mic, color: 'text-teal-500', action: () => setCurrentView('tuner') },
     { title: 'Anuncios', icon: Megaphone, color: 'text-red-500', action: () => setCurrentView('announcements') },
-    { title: 'Calendario', icon: CalendarDays, color: 'text-purple-600', action: () => setCurrentView('calendar') },
     { title: 'Devocionales', icon: BookOpen, color: 'text-indigo-600', action: () => setCurrentView('devotionals') },
     ...(isAdminMode ? [{ title: 'Admin', icon: User, color: 'text-red-500', action: () => setCurrentView('adminDashboard') }] : []),
   ];
@@ -163,10 +161,6 @@ export default function App() {
     
     if (currentView === 'announcements') {
         return <Announcements onBack={() => setCurrentView('menu')} />;
-    }
-    
-    if (currentView === 'calendar') {
-        return <CalendarView onBack={() => setCurrentView('menu')} />;
     }
     
     if (currentView === 'devotionals') {
