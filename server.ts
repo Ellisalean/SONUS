@@ -12,7 +12,7 @@ async function startServer() {
   app.use(express.json());
 
   // Serve static assets from public folder
-  app.use(express.static(path.join(__dirname, 'public')));
+  app.use(express.static(path.join(process.cwd(), 'public')));
 
   // API routes (Proxying Supabase)
   // Since I don't have the keys yet, I will create a placeholder for the integration
