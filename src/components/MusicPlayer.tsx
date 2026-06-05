@@ -1,19 +1,14 @@
 import { useState, useEffect } from 'react';
-import { songs as initialSongs, Song } from '../lib/songs';
+import { Song } from '../lib/songs';
 import { supabase } from '../lib/supabase';
-import { ChevronLeft, ChevronRight, Music, Play, X, Plus, Trash2, Edit2 } from 'lucide-react';
+import { ChevronLeft, Music, Play, X, Plus, Trash2, Edit2, SkipBack, SkipForward } from 'lucide-react';
 
 export default function MusicPlayer({ onBack, isAdminMode }: { onBack: () => void, isAdminMode: boolean }) {
     const [songs, setSongs] = useState<Song[]>([]);
     const [selectedSong, setSelectedSong] = useState<Song | null>(null);
     const [showModal, setShowModal] = useState(false);
-    const [showPlayer, setShowPlayer] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState<Song>({ id: '', title: '', artist: '', youtubeUrl: '' });
-
-    useEffect(() => {
-        fetchSongs();
-    }, []);
 
     const fetchSongs = async () => {
         const { data } = await supabase.from('songs_v4').select('*');
@@ -25,6 +20,10 @@ export default function MusicPlayer({ onBack, isAdminMode }: { onBack: () => voi
         }
     };
 
+    useEffect(() => {
+        fetchSongs();
+    }, []);
+
     const handleSave = async () => {
         try {
             const dataToSave = {
@@ -34,16 +33,12 @@ export default function MusicPlayer({ onBack, isAdminMode }: { onBack: () => voi
                 youtubeUrl: formData.youtubeUrl
             };
             const { error } = await supabase.from('songs_v4').upsert(dataToSave);
-            if (error) {
-                console.error('Supabase error:', error);
-                throw error;
-            }
+            if (error) throw error;
             setShowModal(false);
             setIsEditing(false);
             fetchSongs();
         } catch (error) {
-            console.error('Error saving song:', error);
-            alert('Error al guardar la canción. Por favor intenta de nuevo.');
+            alert('Error al guardar la canción.');
         }
     };
 
@@ -60,99 +55,102 @@ export default function MusicPlayer({ onBack, isAdminMode }: { onBack: () => voi
         setShowModal(true);
     };
 
-    return (
-        <div className="flex flex-col h-full bg-slate-50">
-            <header className="relative h-64 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 rounded-b-[3rem] px-6 pt-10 flex flex-col items-center">
-                <div className="w-full flex justify-between items-center text-white">
-                    <button onClick={onBack} className="p-2 bg-white/20 rounded-full hover:bg-white/30 backdrop-blur-sm transition">
-                        <ChevronLeft />
-                    </button>
-                    <h1 className="text-xl font-bold">Laboratorio Musical</h1>
-                    {isAdminMode && (
-                        <button 
-                            onClick={() => {
-                                setFormData({ id: '', title: '', artist: '', youtubeUrl: '' });
-                                setIsEditing(false);
-                                setShowModal(true);
-                            }}
-                            className="p-2 bg-white/20 rounded-full hover:bg-white/30 backdrop-blur-sm transition"
-                        >
-                            <Plus />
-                        </button>
-                    )}
-                </div>
+    const getYouTubeId = (url: string | undefined | null) => {
+        if (!url) return '';
+        return url.includes('v=') ? url.split('v=')[1].split('&')[0] : url.split('/').pop() || '';
+    };
 
-                <div className="mt-8 bg-white/20 p-6 rounded-full shadow-lg backdrop-blur-md">
-                    <Music size={48} className="text-white" />
-                </div>
+    return (
+        <div className="flex flex-col h-full bg-slate-950 text-white p-6">
+            <header className="flex justify-between items-center mb-8">
+                <button onClick={onBack} className="p-2 bg-slate-800 rounded-full hover:bg-slate-700 transition">
+                    <ChevronLeft />
+                </button>
+                <h1 className="text-lg font-bold">Laboratorio Musical</h1>
+                <div className="w-10"></div>
             </header>
 
-            <div className="flex-1 overflow-y-auto px-6 pt-6">
-                <h3 className="font-extrabold text-slate-800 mb-4 tracking-tight">Repertorio</h3>
-                <div className="space-y-4 pb-12">
-                    {songs.map(song => (
-                        <div 
-                            key={song.id}
-                            onClick={() => {
-                                setSelectedSong(song);
-                                setShowPlayer(true);
-                            }}
-                            className="w-full flex items-center gap-4 p-4 rounded-3xl border transition shadow-sm bg-white border-transparent hover:border-indigo-100"
-                        >
-                            <div className="p-3 bg-indigo-50 rounded-2xl">
-                                <Play size={20} className="text-indigo-600" />
+            {/* Wave and Player Area */}
+            <div className="flex-1 flex flex-col items-center justify-center relative">
+                {/* Spectral Wave Effect */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-40 blur-xl pointer-events-none">
+                    <div className="flex items-center gap-2">
+                        {[...Array(40)].map((_, i) => (
+                            <div key={i} className="w-2 bg-indigo-500 rounded-full animate-pulse" style={{ height: `${Math.random() * 200 + 50}px`, animationDelay: `${i * 0.1}s` }}></div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Player Box */}
+                <div className="relative w-64 h-64 z-10 bg-slate-800 rounded-3xl flex items-center justify-center shadow-2xl overflow-hidden">
+                    {selectedSong ? (
+                        selectedSong.youtubeUrl ? (
+                            <iframe
+                                className="w-full h-full"
+                                src={`https://www.youtube.com/embed/${getYouTubeId(selectedSong.youtubeUrl)}?controls=1&autoplay=1`}
+                                title="YouTube video player"
+                                frameBorder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowFullScreen
+                            />
+                        ) : (
+                            <div className="text-center p-4">
+                                <div className="font-bold text-lg mb-1 truncate">{selectedSong.title}</div>
+                                <div className="text-sm text-slate-400">{selectedSong.artist}</div>
                             </div>
-                            <div className="flex-1 text-left">
-                                <div className="font-bold text-slate-900">{song.title}</div>
-                                <div className="text-xs text-slate-500 font-medium">{song.artist}</div>
+                        )
+                    ) : (
+                        <Music size={64} className="text-slate-600" />
+                    )}
+                </div>
+            </div>
+
+            {/* Playlist */}
+            <div className="mt-8">
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-xl font-bold">Recent Sounds</h3>
+                     {isAdminMode && (
+                        <button onClick={() => { setFormData({ id: '', title: '', artist: '', youtubeUrl: '' }); setIsEditing(false); setShowModal(true); }} className="p-2 bg-slate-800 rounded-full">
+                            <Plus size={20} />
+                        </button>
+                     )}
+                </div>
+                <div className="space-y-4 max-h-64 overflow-y-auto pr-2">
+                    {songs.map(song => (
+                        <div key={song.id} 
+                             onClick={() => setSelectedSong(song)}
+                             className="flex items-center gap-4 p-3 bg-slate-900 rounded-2xl hover:bg-slate-800 transition cursor-pointer">
+                            <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0">
+                                <img src={`https://img.youtube.com/vi/${getYouTubeId(song.youtubeUrl)}/mqdefault.jpg`} alt={song.title} className="w-full h-full object-cover" />
+                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                     <Play size={16} className="text-white" />
+                                </div>
+                            </div>
+                            <div className="flex-1 overflow-hidden">
+                                <div className="font-semibold truncate">{song.title}</div>
+                                <div className="text-xs text-slate-400 truncate">{song.artist}</div>
                             </div>
                             {isAdminMode && (
-                                <>
-                                    <button onClick={(e) => startEdit(song, e)} className="p-2 text-slate-400 hover:text-indigo-600"><Edit2 size={18} /></button>
-                                    <button onClick={(e) => handleDelete(song.id, e)} className="p-2 text-slate-400 hover:text-red-600"><Trash2 size={18} /></button>
-                                </>
+                                <div className="flex gap-2">
+                                    <button onClick={(e) => startEdit(song, e)} className="text-slate-500 hover:text-indigo-400"><Edit2 size={16} /></button>
+                                    <button onClick={(e) => handleDelete(song.id, e)} className="text-slate-500 hover:text-red-400"><Trash2 size={16} /></button>
+                                </div>
                             )}
                         </div>
                     ))}
                 </div>
             </div>
 
-            {showPlayer && selectedSong && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-                    <div className="w-full max-w-sm bg-white rounded-3xl p-4 shadow-2xl flex flex-col">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="font-bold text-lg">{selectedSong.title}</h2>
-                            <button onClick={() => setShowPlayer(false)} className="p-2 bg-slate-100 rounded-full hover:bg-slate-200">
-                                <X size={20} />
-                            </button>
-                        </div>
-                        <div className="aspect-video w-full rounded-2xl overflow-hidden bg-black flex items-center justify-center">
-                            {selectedSong.youtubeUrl ? (
-                                <iframe
-                                    className="w-full h-full"
-                                    src={`https://www.youtube.com/embed/${selectedSong.youtubeUrl.includes('v=') ? selectedSong.youtubeUrl.split('v=')[1].split('&')[0] : selectedSong.youtubeUrl.split('/').pop()}`}
-                                    title="YouTube video player"
-                                    frameBorder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                    allowFullScreen
-                                />
-                            ) : (
-                                <p className="text-white text-sm">URL de video no disponible</p>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
             {showModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-                    <div className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl flex flex-col gap-4">
-                        <h2 className="font-bold text-lg">{isEditing ? 'Editar canción' : 'Añadir canción'}</h2>
-                        <input type="text" placeholder="Título" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="p-3 border rounded-xl" />
-                        <input type="text" placeholder="Artista" value={formData.artist} onChange={e => setFormData({...formData, artist: e.target.value})} className="p-3 border rounded-xl" />
-                        <input type="text" placeholder="URL de Youtube" value={formData.youtubeUrl} onChange={e => setFormData({...formData, youtubeUrl: e.target.value})} className="p-3 border rounded-xl" />
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+                    <div className="w-full max-w-sm bg-slate-900 rounded-3xl p-6 shadow-2xl flex flex-col gap-4">
+                        <h2 className="font-bold text-lg text-white">{isEditing ? 'Editar canción' : 'Añadir canción'}</h2>
+                        <input type="text" placeholder="Título" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="p-3 bg-slate-800 border-none rounded-xl text-white" />
+                        <input type="text" placeholder="Artista" value={formData.artist} onChange={e => setFormData({...formData, artist: e.target.value})} className="p-3 bg-slate-800 border-none rounded-xl text-white" />
+                        <input type="text" placeholder="URL de Youtube" value={formData.youtubeUrl} onChange={e => setFormData({...formData, youtubeUrl: e.target.value})} className="p-3 bg-slate-800 border-none rounded-xl text-white" />
                         <div className="flex gap-2">
-                             <button onClick={() => setShowModal(false)} className="flex-1 p-3 bg-gray-100 rounded-xl hover:bg-gray-200">Cancelar</button>
-                             <button onClick={handleSave} className="flex-1 p-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700">Guardar</button>
+                             <button onClick={() => setShowModal(false)} className="flex-1 p-3 bg-slate-800 rounded-xl text-white">Cancelar</button>
+                             <button onClick={handleSave} className="flex-1 p-3 bg-indigo-600 text-white rounded-xl">Guardar</button>
                         </div>
                     </div>
                 </div>

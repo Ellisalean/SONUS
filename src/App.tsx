@@ -98,7 +98,7 @@ export default function App() {
   }, []);
 
   const menuItems = [
-    { title: 'Partituras', icon: FileText, color: 'text-blue-600', action: () => setCurrentView('sheetMusic') },
+    { title: 'Sonus', icon: FileText, color: 'text-blue-600', action: () => setCurrentView('sheetMusic') },
     { title: 'Setlists', icon: BarChart2, color: 'text-orange-500', action: () => setCurrentView('setlistPlanner') },
     { title: 'Afinador y Tools', icon: Mic, color: 'text-teal-500', action: () => setCurrentView('tuner') },
     { title: 'Anuncios', icon: Megaphone, color: 'text-red-500', action: () => setCurrentView('announcements') },
@@ -272,7 +272,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-cyan-400 via-emerald-400 to-orange-300 text-gray-900 p-4 pb-32 font-sans">
+    <div className={`min-h-screen ${currentView === 'music' ? 'bg-slate-950 text-white' : 'bg-gradient-to-b from-cyan-400 via-emerald-400 to-orange-300'} p-4 pb-32 font-sans`}>
       {currentView !== 'viewer' && (
         <header className="flex justify-between items-center mb-6 pt-4">
           <div className="flex items-center gap-2">
@@ -282,7 +282,7 @@ export default function App() {
                   </button>
               )}
               <h1 className={`text-5xl font-extrabold tracking-tight ${currentView === 'menu' ? 'font-logo' : ''}`}>
-                  {currentView === 'menu' ? 'SONUS' : 'Partituras'}
+                  {currentView === 'menu' ? 'SONUS' : 'Sonus'}
               </h1>
           </div>
           <button className="p-2 bg-black/5 rounded-full hover:bg-black/10 transition-colors">
