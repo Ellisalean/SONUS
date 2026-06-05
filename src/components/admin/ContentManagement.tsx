@@ -6,6 +6,7 @@ export default function ContentManagement() {
   const [table, setTable] = useState<'anuncios' | 'agenda' | 'devocionales' | 'canciones'>('anuncios');
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [verse, setVerse] = useState('');
   const [artist, setArtist] = useState('');
   const [status, setStatus] = useState('');
   const [items, setItems] = useState<any[]>([]);
@@ -46,11 +47,11 @@ export default function ContentManagement() {
     } else if (table === 'agenda') {
         payload = { title: title, fecha: new Date().toISOString(), time: '09:00 AM', type: 'event' };
     } else { // devocionales
-        payload = { titulo: title, contenido: content, fecha: new Date().toISOString() };
+        payload = { titulo: title, contenido: content, versiculo: verse, fecha: new Date().toISOString() };
     }
     const { error } = await supabase.from(table).insert(payload);
     if (error) setStatus('Error: ' + error.message);
-    else { setStatus('Guardado!'); setTitle(''); setContent(''); fetchData(); }
+    else { setStatus('Guardado!'); setTitle(''); setContent(''); setVerse(''); fetchData(); }
   };
 
   const fetchData = async () => {
@@ -81,6 +82,7 @@ export default function ContentManagement() {
         <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Título" className="w-full p-2 border rounded" required />
         {table === 'canciones' && <input value={artist} onChange={e => setArtist(e.target.value)} placeholder="Artista" className="w-full p-2 border rounded" required />}
         <textarea value={content} onChange={e => setContent(e.target.value)} placeholder={table === 'canciones' ? 'Acordes' : 'Contenido'} className="w-full p-2 border rounded" required />
+        {table === 'devocionales' && <input value={verse} onChange={e => setVerse(e.target.value)} placeholder="Versículo" className="w-full p-2 border rounded" />}
         <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded">Añadir</button>
       </form>
       {status && <p className="mt-2 text-sm text-center mb-4">{status}</p>}

@@ -31,7 +31,7 @@ export default function MusicPlayer({ onBack, isAdminMode }: { onBack: () => voi
                 id: formData.id || crypto.randomUUID(),
                 title: formData.title,
                 artist: formData.artist,
-                youtube_url: formData.youtubeUrl
+                youtubeUrl: formData.youtubeUrl
             };
             const { error } = await supabase.from('songs_v4').upsert(dataToSave);
             if (error) {

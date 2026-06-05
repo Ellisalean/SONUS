@@ -30,7 +30,7 @@ export default function Devotionals({ onBack }: { onBack: () => void }) {
                     id: d.id,
                     created_at: d.created_at || d.fecha,
                     title: d.titulo || d.title || 'Sin título',
-                    verse: 'Versículo no disponible',
+                    verse: d.versiculo || 'Versículo no disponible',
                     reflection: d.contenido || d.reflection || ''
                 }));
                 setDevotionals(mappedData);
