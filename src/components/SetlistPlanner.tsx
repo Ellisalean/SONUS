@@ -62,9 +62,11 @@ export default function SetlistPlanner({ onBack, onSelectSetlist, isAdminMode }:
           placeholder="Nombre del nuevo Setlist"
           className="w-full p-3 bg-gray-100 rounded-lg mb-2"
         />
-        <button onClick={createSetlist} className="w-full bg-blue-600 text-white p-3 rounded-lg font-bold flex items-center justify-center gap-2">
-            <Plus size={20} /> Crear Setlist
-        </button>
+        {isAdminMode && (
+          <button onClick={createSetlist} className="w-full bg-blue-600 text-white p-3 rounded-lg font-bold flex items-center justify-center gap-2">
+              <Plus size={20} /> Crear Setlist
+          </button>
+        )}
       </div>
 
       <div className="space-y-6">
@@ -73,7 +75,7 @@ export default function SetlistPlanner({ onBack, onSelectSetlist, isAdminMode }:
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold text-lg">{setlist.name}</h3>
               <div className="flex gap-2">
-                  <button onClick={(e) => { e.stopPropagation(); setEditingSetlist(setlist); }} className="text-blue-600 font-medium">Editar</button>
+                  {isAdminMode && <button onClick={(e) => { e.stopPropagation(); setEditingSetlist(setlist); }} className="text-blue-600 font-medium">Editar</button>}
                   {isAdminMode && <button onClick={(e) => { e.stopPropagation(); deleteSetlistById(setlist.id); }} className="text-red-500"><Trash2 size={18} /></button>}
               </div>
             </div>
