@@ -17,7 +17,12 @@ export default function MusicPlayer({ onBack, isAdminMode }: { onBack: () => voi
 
     const fetchSongs = async () => {
         const { data } = await supabase.from('songs_v4').select('*');
-        if (data) setSongs(data);
+        if (data) {
+            setSongs(data.map((song: any) => ({
+                ...song,
+                youtubeUrl: song.youtube_url || song.youtubeUrl
+            })));
+        }
     };
 
     const handleSave = async () => {
@@ -26,7 +31,7 @@ export default function MusicPlayer({ onBack, isAdminMode }: { onBack: () => voi
                 id: formData.id || crypto.randomUUID(),
                 title: formData.title,
                 artist: formData.artist,
-                youtubeUrl: formData.youtubeUrl
+                youtube_url: formData.youtubeUrl
             };
             const { error } = await supabase.from('songs_v4').upsert(dataToSave);
             if (error) {
