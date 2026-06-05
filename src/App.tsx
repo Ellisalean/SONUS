@@ -168,7 +168,7 @@ export default function App() {
     }
     
     if (currentView === 'music') {
-        return <MusicPlayer onBack={() => setCurrentView('menu')} />;
+        return <MusicPlayer isAdminMode={isAdminMode} onBack={() => setCurrentView('menu')} />;
     }
     if (currentView === 'auth') {
         return <AuthForm onSuccess={() => setCurrentView('menu')} />;

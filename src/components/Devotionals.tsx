@@ -26,7 +26,14 @@ export default function Devotionals({ onBack }: { onBack: () => void }) {
             if (error) {
                 console.error('Error fetching devotionals:', error);
             } else {
-                setDevotionals(data || []);
+                const mappedData: Devotional[] = (data || []).map((d: any) => ({
+                    id: d.id,
+                    created_at: d.created_at || d.fecha,
+                    title: d.titulo || d.title || 'Sin título',
+                    verse: 'Versículo no disponible',
+                    reflection: d.contenido || d.reflection || ''
+                }));
+                setDevotionals(mappedData);
             }
             setLoading(false);
         }

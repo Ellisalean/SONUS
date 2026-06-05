@@ -3,7 +3,7 @@ import { songs as initialSongs, Song } from '../lib/songs';
 import { supabase } from '../lib/supabase';
 import { ChevronLeft, ChevronRight, Music, Play, X, Plus, Trash2, Edit2 } from 'lucide-react';
 
-export default function MusicPlayer({ onBack }: { onBack: () => void }) {
+export default function MusicPlayer({ onBack, isAdminMode }: { onBack: () => void, isAdminMode: boolean }) {
     const [songs, setSongs] = useState<Song[]>([]);
     const [selectedSong, setSelectedSong] = useState<Song | null>(null);
     const [showModal, setShowModal] = useState(false);
@@ -52,16 +52,18 @@ export default function MusicPlayer({ onBack }: { onBack: () => void }) {
                         <ChevronLeft />
                     </button>
                     <h1 className="text-xl font-bold">Laboratorio Musical</h1>
-                    <button 
-                        onClick={() => {
-                            setFormData({ id: '', title: '', artist: '', youtubeUrl: '' });
-                            setIsEditing(false);
-                            setShowModal(true);
-                        }}
-                        className="p-2 bg-white/20 rounded-full hover:bg-white/30 backdrop-blur-sm transition"
-                    >
-                        <Plus />
-                    </button>
+                    {isAdminMode && (
+                        <button 
+                            onClick={() => {
+                                setFormData({ id: '', title: '', artist: '', youtubeUrl: '' });
+                                setIsEditing(false);
+                                setShowModal(true);
+                            }}
+                            className="p-2 bg-white/20 rounded-full hover:bg-white/30 backdrop-blur-sm transition"
+                        >
+                            <Plus />
+                        </button>
+                    )}
                 </div>
 
                 <div className="mt-8 bg-white/20 p-6 rounded-full shadow-lg backdrop-blur-md">
@@ -88,8 +90,12 @@ export default function MusicPlayer({ onBack }: { onBack: () => void }) {
                                 <div className="font-bold text-slate-900">{song.title}</div>
                                 <div className="text-xs text-slate-500 font-medium">{song.artist}</div>
                             </div>
-                            <button onClick={(e) => startEdit(song, e)} className="p-2 text-slate-400 hover:text-indigo-600"><Edit2 size={18} /></button>
-                            <button onClick={(e) => handleDelete(song.id, e)} className="p-2 text-slate-400 hover:text-red-600"><Trash2 size={18} /></button>
+                            {isAdminMode && (
+                                <>
+                                    <button onClick={(e) => startEdit(song, e)} className="p-2 text-slate-400 hover:text-indigo-600"><Edit2 size={18} /></button>
+                                    <button onClick={(e) => handleDelete(song.id, e)} className="p-2 text-slate-400 hover:text-red-600"><Trash2 size={18} /></button>
+                                </>
+                            )}
                         </div>
                     ))}
                 </div>
@@ -104,15 +110,19 @@ export default function MusicPlayer({ onBack }: { onBack: () => void }) {
                                 <X size={20} />
                             </button>
                         </div>
-                        <div className="aspect-video w-full rounded-2xl overflow-hidden bg-black">
-                        <iframe
-                                className="w-full h-full"
-                                src={`https://www.youtube.com/embed/${selectedSong.youtubeUrl.includes('v=') ? selectedSong.youtubeUrl.split('v=')[1] : selectedSong.youtubeUrl.split('/').pop()}`}
-                                title="YouTube video player"
-                                frameBorder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                allowFullScreen
-                            />
+                        <div className="aspect-video w-full rounded-2xl overflow-hidden bg-black flex items-center justify-center">
+                            {selectedSong.youtubeUrl ? (
+                                <iframe
+                                    className="w-full h-full"
+                                    src={`https://www.youtube.com/embed/${selectedSong.youtubeUrl.includes('v=') ? selectedSong.youtubeUrl.split('v=')[1].split('&')[0] : selectedSong.youtubeUrl.split('/').pop()}`}
+                                    title="YouTube video player"
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    allowFullScreen
+                                />
+                            ) : (
+                                <p className="text-white text-sm">URL de video no disponible</p>
+                            )}
                         </div>
                     </div>
                 </div>
