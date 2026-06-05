@@ -19,7 +19,7 @@ export default function Devotionals({ onBack }: { onBack: () => void }) {
         async function fetchDevotionals() {
             setLoading(true);
             const { data, error } = await supabase
-                .from('devocionales')
+                .from('devotionals')
                 .select('*')
                 .order('created_at', { ascending: false });
 

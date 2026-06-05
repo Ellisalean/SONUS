@@ -21,14 +21,25 @@ export default function MusicPlayer({ onBack, isAdminMode }: { onBack: () => voi
     };
 
     const handleSave = async () => {
-        if (isEditing) {
-            await supabase.from('songs_v4').update({ title: formData.title, artist: formData.artist, youtubeUrl: formData.youtubeUrl }).eq('id', formData.id);
-        } else {
-            await supabase.from('songs_v4').insert({ id: crypto.randomUUID(), title: formData.title, artist: formData.artist, youtubeUrl: formData.youtubeUrl });
+        try {
+            const dataToSave = {
+                id: formData.id || crypto.randomUUID(),
+                title: formData.title,
+                artist: formData.artist,
+                youtubeUrl: formData.youtubeUrl
+            };
+            const { error } = await supabase.from('songs_v4').upsert(dataToSave);
+            if (error) {
+                console.error('Supabase error:', error);
+                throw error;
+            }
+            setShowModal(false);
+            setIsEditing(false);
+            fetchSongs();
+        } catch (error) {
+            console.error('Error saving song:', error);
+            alert('Error al guardar la canción. Por favor intenta de nuevo.');
         }
-        setShowModal(false);
-        setIsEditing(false);
-        fetchSongs();
     };
 
     const handleDelete = async (id: string, e: React.MouseEvent) => {
